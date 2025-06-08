@@ -12,8 +12,8 @@ export async function GetStockInfoFH(
   // Try to parse from body if not in query (for POST requests)
   if (!symbol) {
     try {
-      const body = (await request.json()) as { ticker?: string };
-      symbol = body?.ticker;
+      const body = (await request.json()) as { symbol?: string };
+      symbol = body?.symbol;
     } catch {
       // no body or invalid json, ignore
     }
@@ -22,7 +22,7 @@ export async function GetStockInfoFH(
   if (!symbol) {
     return {
       status: 400,
-      body: "Missing 'ticker' query parameter or body field.",
+      body: "Missing 'symbol' query parameter or body field.",
     };
   }
 
@@ -65,7 +65,7 @@ export async function GetStockInfoFH(
     if (!quoteData || quoteData.c === undefined) {
       return {
         status: 404,
-        body: `Price data not found for ticker: '${symbol}'.`,
+        body: `Price data not found for symbol: '${symbol}'.`,
       };
     }
 
@@ -87,26 +87,26 @@ export async function GetStockInfoFH(
     if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
       return {
         status: 504,
-        body: `Request to Finnhub API timed out for ticker: '${symbol}'.`,
+        body: `Request to Finnhub API timed out for symbol: '${symbol}'.`,
       };
     }
 
     if (err.response) {
       return {
         status: err.response.status || 500,
-        body: `Finnhub API error for ticker '${symbol}': ${JSON.stringify(err.response.data)}`,
+        body: `Finnhub API error for symbol '${symbol}': ${JSON.stringify(err.response.data)}`,
       };
     }
 
     return {
       status: 500,
-      body: `Unexpected error fetching stock info for ticker '${symbol}'.`,
+      body: `Unexpected error fetching stock info for symbol '${symbol}'.`,
     };
   }
 }
 
-app.http("GetStockInfoFH", {
-  methods: ["GET", "POST"],
+app.http("StockInfoFH", {
+  methods: ["GET"],
   authLevel: "anonymous",
   handler: GetStockInfoFH,
 });

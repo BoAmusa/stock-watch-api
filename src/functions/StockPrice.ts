@@ -95,8 +95,8 @@ if (request.method === "POST") {
   }
 }
 
-app.http("GetStockPrice", {
-  methods: ["GET", "POST"],
+app.http("StockPrice", {
+  methods: ["GET"],
   authLevel: "anonymous",
   handler: GetStockPrice,
 });

@@ -64,7 +64,7 @@ export async function GetStockInfo(
   }
 }
 
-app.http("GetStockInfo", {
+app.http("StockInfo", {
   methods: ["GET"],
   authLevel: "anonymous",
   handler: GetStockInfo
