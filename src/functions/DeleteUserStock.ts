@@ -37,10 +37,10 @@ export async function DeleteUserStock(
       body: "Failed to delete stock.",
     };
   }
-
-  app.http("UserStock", {
-    methods: ["DELETE"],
-    authLevel: "anonymous",
-    handler: DeleteUserStock,
-  });
 }
+
+app.http("DeleteUserStock", {
+  methods: ["DELETE"],
+  authLevel: "anonymous",
+  handler: DeleteUserStock,
+});

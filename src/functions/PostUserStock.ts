@@ -25,7 +25,7 @@ export async function PostUserStock(
     }
 
     const newDoc: UserStockDocument = {
-      id: `${body.stock.symbol}-${Date.now()}`, // ensures uniqueness
+      id: `${body.stock.symbol}-${body.userId}`, // ensures uniqueness
       userId: body.userId,
       stock: body.stock,
     };
