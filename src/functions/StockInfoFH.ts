@@ -1,4 +1,9 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import {
+  app,
+  HttpRequest,
+  HttpResponseInit,
+  InvocationContext,
+} from "@azure/functions";
 import * as axios from "axios";
 
 const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
@@ -7,13 +12,13 @@ export async function GetStockInfoFH(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  let symbol = request.query.get("symbol");
+  let symbol = request.query.get("symbol")?.toUpperCase();
 
   // Try to parse from body if not in query (for POST requests)
   if (!symbol) {
     try {
       const body = (await request.json()) as { symbol?: string };
-      symbol = body?.symbol;
+      symbol = body?.symbol?.toUpperCase();
     } catch {
       // no body or invalid json, ignore
     }
@@ -82,7 +87,10 @@ export async function GetStockInfoFH(
       },
     };
   } catch (err: any) {
-    context.error(`Error fetching stock info for ${symbol}:`, err.message || err);
+    context.error(
+      `Error fetching stock info for ${symbol}:`,
+      err.message || err
+    );
 
     if (err.code === "ECONNABORTED" || err.message.includes("timeout")) {
       return {
@@ -94,7 +102,9 @@ export async function GetStockInfoFH(
     if (err.response) {
       return {
         status: err.response.status || 500,
-        body: `Finnhub API error for symbol '${symbol}': ${JSON.stringify(err.response.data)}`,
+        body: `Finnhub API error for symbol '${symbol}': ${JSON.stringify(
+          err.response.data
+        )}`,
       };
     }
 
