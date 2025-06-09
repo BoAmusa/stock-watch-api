@@ -6,7 +6,7 @@ import {
 } from "@azure/functions";
 
 import { container } from "../cosmosClient"; // Import the Cosmos DB container
-import { StockInfo, UserStockDocument } from "../types/UserDB.types"; // Adjust the import path as necessary
+import { StockInfo, UserStockDocument } from "../types/userDB.types";
 
 export async function PostUserStock(
   request: HttpRequest,
@@ -15,7 +15,10 @@ export async function PostUserStock(
   context.log(`Processing stock POST request: ${request.url}`);
 
   try {
-    const body = (await request.json()) as { userId: string; stock: StockInfo };
+    const body = (await request.json()) as {
+      userId: string;
+      stock: StockInfo;
+    };
 
     if (!body.userId || !body.stock?.symbol) {
       return {
@@ -25,12 +28,12 @@ export async function PostUserStock(
     }
 
     const newDoc: UserStockDocument = {
-      id: `${body.stock.symbol}-${body.userId}`, // ensures uniqueness
+      id: `${body.stock.symbol}-${body.userId}`,
       userId: body.userId,
       stock: body.stock,
     };
 
-    const { resource } = await container.items.create(newDoc);
+    const { resource } = await container.items.upsert(newDoc);
 
     return {
       status: 201,
@@ -40,7 +43,7 @@ export async function PostUserStock(
       },
     };
   } catch (error: any) {
-    context.error("Failed to save stock:", error);
+    context.error("Failed to save stock:", error.message);
     return {
       status: 500,
       body: "Failed to save stock to database.",

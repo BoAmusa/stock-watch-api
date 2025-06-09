@@ -15,12 +15,13 @@ export async function DeleteUserStock(
 
   try {
     const userId = request.query.get("userId");
-    const stockId = request.query.get("stockId");
+    const stockSymbol = request.query.get("stockSymbol");
+    const stockId = `${stockSymbol}-${userId}`;
 
-    if (!userId || !stockId) {
+    if (!userId || !stockSymbol) {
       return {
         status: 400,
-        body: "Missing 'userId' or 'stockId' in query parameters.",
+        body: "Missing 'userId' or 'stockSymbol' in query parameters.",
       };
     }
 
