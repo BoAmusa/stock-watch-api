@@ -19,5 +19,3 @@ A serverless API built with **Azure Functions** to handle backend operations suc
 - **JWT Bearer Authentication**
 - **Finnhub API**, **TwelveData API** (for stock price lookups)
 
-## 📁 Project Structure
-
