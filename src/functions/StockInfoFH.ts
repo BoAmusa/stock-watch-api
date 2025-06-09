@@ -5,6 +5,7 @@ import {
   InvocationContext,
 } from "@azure/functions";
 import * as axios from "axios";
+import { verifyUserEmail } from "../auth/authUtils";
 
 const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
 
@@ -12,6 +13,13 @@ export async function GetStockInfoFH(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
+  if (!verifyUserEmail(request)) {
+    return {
+      status: 401,
+      body: "Unauthorized: User verification failed.",
+    };
+  }
+
   let symbol = request.query.get("symbol")?.toUpperCase();
 
   // Try to parse from body if not in query (for POST requests)

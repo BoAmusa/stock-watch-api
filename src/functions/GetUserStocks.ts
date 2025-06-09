@@ -5,11 +5,19 @@ import {
   InvocationContext,
 } from "@azure/functions";
 import { container } from "../cosmosClient"; // Import the Cosmos DB container
+import { verifyUserEmail } from "../auth/authUtils";
 
 export async function GetUserStocks(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
+  if (!verifyUserEmail(request)) {
+    return {
+      status: 401,
+      body: "Unauthorized: User verification failed.",
+    };
+  }
+
   const userId = request.query.get("userId");
 
   if (!userId) {

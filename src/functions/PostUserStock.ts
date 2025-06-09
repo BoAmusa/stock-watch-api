@@ -7,12 +7,20 @@ import {
 
 import { container } from "../cosmosClient"; // Import the Cosmos DB container
 import { StockInfo, UserStockDocument } from "../types/userDB.types";
+import { verifyUserEmail } from "../auth/authUtils";
 
 export async function PostUserStock(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.log(`Processing stock POST request: ${request.url}`);
+
+  if (!verifyUserEmail(request)) {
+    return {
+      status: 401,
+      body: "Unauthorized: User verification failed.",
+    };
+  }
 
   try {
     const body = (await request.json()) as {

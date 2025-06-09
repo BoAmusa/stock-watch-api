@@ -6,12 +6,20 @@ import {
 } from "@azure/functions";
 
 import { container } from "../cosmosClient";
+import { verifyUserEmail } from "../auth/authUtils";
 
 export async function DeleteUserStock(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.log(`DELETE request received: ${request.url}`);
+
+  if (!verifyUserEmail(request)) {
+    return {
+      status: 401,
+      body: "Unauthorized: User verification failed.",
+    };
+  }
 
   try {
     const userId = request.query.get("userId");

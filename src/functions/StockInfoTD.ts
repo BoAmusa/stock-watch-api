@@ -1,5 +1,11 @@
-import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import {
+  app,
+  HttpRequest,
+  HttpResponseInit,
+  InvocationContext,
+} from "@azure/functions";
 import axios = require("axios");
+import { verifyUserEmail } from "../auth/authUtils";
 
 const TWELVE_DATA_API_URL = "https://api.twelvedata.com";
 const API_KEY = process.env.TWELVE_DATA_API_KEY;
@@ -8,19 +14,26 @@ export async function GetStockInfo(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
+  if (!verifyUserEmail(request)) {
+    return {
+      status: 401,
+      body: "Unauthorized: User verification failed.",
+    };
+  }
+
   const querySymbol = request.query.get("symbol");
 
   if (!querySymbol) {
     return {
       status: 400,
-      body: "Missing 'symbol' query parameter (e.g., ?symbol=AAPL)."
+      body: "Missing 'symbol' query parameter (e.g., ?symbol=AAPL).",
     };
   }
 
   if (!API_KEY) {
     return {
       status: 500,
-      body: "Twelve Data API key is not set in environment variables."
+      body: "Twelve Data API key is not set in environment variables.",
     };
   }
 
@@ -28,17 +41,26 @@ export async function GetStockInfo(
     const response = await axios.get(`${TWELVE_DATA_API_URL}/stocks`, {
       params: {
         symbol: querySymbol,
-        apikey: API_KEY
+        apikey: API_KEY,
       },
-      timeout: 10000
+      timeout: 10000,
     });
 
-    const stockData = response.data as { data?: Array<{ symbol: string; name: string; exchange: string; type: string; currency: string; country: string }> };
+    const stockData = response.data as {
+      data?: Array<{
+        symbol: string;
+        name: string;
+        exchange: string;
+        type: string;
+        currency: string;
+        country: string;
+      }>;
+    };
 
     if (!stockData || !stockData.data || stockData.data.length === 0) {
       return {
         status: 404,
-        body: `No stock info found for symbol '${querySymbol}'.`
+        body: `No stock info found for symbol '${querySymbol}'.`,
       };
     }
 
@@ -52,14 +74,14 @@ export async function GetStockInfo(
         exchange: stock.exchange,
         type: stock.type,
         currency: stock.currency,
-        country: stock.country
-      }
+        country: stock.country,
+      },
     };
   } catch (err: any) {
     context.error(`Error fetching stock info: ${err?.message ?? err}`);
     return {
       status: 500,
-      body: "Error retrieving stock info from Twelve Data."
+      body: "Error retrieving stock info from Twelve Data.",
     };
   }
 }
@@ -67,5 +89,5 @@ export async function GetStockInfo(
 app.http("StockInfo", {
   methods: ["GET"],
   authLevel: "anonymous",
-  handler: GetStockInfo
+  handler: GetStockInfo,
 });
